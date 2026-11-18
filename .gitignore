@@ -1,0 +1,22 @@
+node_modules/
+build/
+dist/
+coverage/
+.DS_Store
+*.log
+
+# secrets: never commit these
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.jks
+keystore.properties
+service-account*.json
+
+# local working files
+/data/
+/.claude/
+/.serena/
+/*.csv

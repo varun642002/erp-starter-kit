@@ -1,0 +1,9 @@
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+    // The ERP does not store files here, so nobody can read or write them from a browser.
+    match /{allPaths=**} {
+      allow read, write: if false;
+    }
+  }
+}

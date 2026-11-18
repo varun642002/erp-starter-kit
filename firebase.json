@@ -1,0 +1,19 @@
+{
+  "auth": {
+    "authorizedDomains": ["localhost"],
+    "providers": {
+      "emailPassword": true,
+      "googleSignIn": {
+        "oAuthBrandDisplayName": "Your ERP",
+        "supportEmail": "you@example.com"
+      }
+    }
+  },
+  "firestore": {
+    "rules": "firestore.rules"
+  },
+  "storage": {
+    "bucket": "your-firebase-project-id.appspot.com",
+    "rules": "storage.rules"
+  }
+}

@@ -1,0 +1,632 @@
+@import "tailwindcss";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+@theme {
+  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, monospace;
+
+  /* Softer, layered shadows: depth without heavy edges */
+  --shadow-2xs: 0 1px 1px rgb(15 23 42 / 0.04);
+  --shadow-xs: 0 1px 2px rgb(15 23 42 / 0.05), 0 1px 1px rgb(15 23 42 / 0.03);
+  --shadow-sm: 0 1px 3px rgb(15 23 42 / 0.07), 0 1px 2px rgb(15 23 42 / 0.04);
+  --shadow-md: 0 4px 10px -2px rgb(15 23 42 / 0.08), 0 2px 4px -2px rgb(15 23 42 / 0.05);
+  --shadow-lg: 0 12px 24px -6px rgb(15 23 42 / 0.12), 0 4px 8px -4px rgb(15 23 42 / 0.06);
+  --shadow-xl: 0 20px 36px -10px rgb(15 23 42 / 0.16), 0 8px 12px -6px rgb(15 23 42 / 0.07);
+  --shadow-2xl: 0 28px 56px -14px rgb(15 23 42 / 0.28);
+
+  /* A little rounder: cards and dialogs feel friendlier */
+  --radius-lg: 0.625rem;
+  --radius-xl: 0.875rem;
+  --radius-2xl: 1.125rem;
+
+  --animate-page-in: page-in 0.32s cubic-bezier(0.22, 1, 0.36, 1) backwards;
+}
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+  }
+
+  ::selection {
+    background: rgb(59 130 246 / 0.22);
+  }
+
+  /* Everything that can be pressed or typed into eases between its states instead of snapping */
+  :where(button, a, select, input, textarea, summary, [role='button'], [role='switch']) {
+    transition:
+      background-color 0.16s ease,
+      border-color 0.16s ease,
+      color 0.16s ease,
+      box-shadow 0.18s ease,
+      opacity 0.16s ease,
+      transform 0.12s ease;
+  }
+
+  /* A small press effect on buttons */
+  :where(button, [role='button']):not(:disabled):active {
+    transform: scale(0.975);
+  }
+
+  /* Fields glow softly when you are typing in them */
+  :where(input:not([type='checkbox']):not([type='radio']):not([type='range']), select, textarea):focus {
+    border-color: rgb(59 130 246 / 0.65);
+    box-shadow: 0 0 0 3px rgb(59 130 246 / 0.14);
+  }
+
+  /* Table rows ease their highlight */
+  :where(tbody tr) {
+    transition: background-color 0.14s ease;
+  }
+
+  /* Figures line up in columns so amounts are easy to scan */
+  table {
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* One clear keyboard focus ring everywhere */
+  :where(button, a, input, select, textarea, [tabindex]):focus-visible {
+    outline: 2px solid rgb(59 130 246 / 0.55);
+    outline-offset: 1px;
+  }
+
+  /* Buttons that cannot be used look like it */
+  button:disabled {
+    cursor: not-allowed;
+  }
+
+  /* Money and quantity fields: no scroll-wheel or spinner accidents */
+  input[type='number']::-webkit-outer-spin-button,
+  input[type='number']::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+  input[type='number'] {
+    -moz-appearance: textfield;
+    appearance: textfield;
+  }
+  code, kbd, samp, pre {
+    font-family: 'JetBrains Mono', monospace;
+  }
+}
+
+/* Custom subtle scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(148, 163, 184, 0.4);
+  border-radius: 9999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(100, 116, 139, 0.6);
+}
+
+/* Print optimizations for invoices and reports */
+@media print {
+  body {
+    background: white !important;
+    color: black !important;
+  }
+  .no-print {
+    display: none !important;
+  }
+  .print-only {
+    display: block !important;
+  }
+  .print-container {
+    width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    box-shadow: none !important;
+    border: none !important;
+  }
+}
+
+
+/* ---------------------------------------------------------------------------------------------
+   Motion and finishing touches
+   --------------------------------------------------------------------------------------------- */
+
+@keyframes page-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes erp-fade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes erp-zoom {
+  from {
+    opacity: 0;
+    transform: scale(0.96) translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes erp-slide-right {
+  from {
+    opacity: 0;
+    transform: translateX(24px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes erp-slide-down {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes erp-shimmer {
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+/* Each screen glides in when you open it */
+.page-enter {
+  animation: var(--animate-page-in);
+}
+
+/* The animation classes the dialogs and menus already ask for (they were never defined, so nothing moved).
+   One class sets the base motion; the extras pick the style. */
+.animate-in {
+  animation: erp-fade 0.2s ease-out both;
+}
+.animate-in.fade-in {
+  animation-name: erp-fade;
+}
+.animate-in.zoom-in-95,
+.animate-in.zoom-in {
+  animation: erp-zoom 0.24s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+.animate-in.slide-in-from-right,
+.animate-in.slide-in-from-right-4 {
+  animation: erp-slide-right 0.28s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+.animate-in.slide-in-from-top,
+.animate-in.slide-in-from-top-2,
+.animate-in.slide-in-from-top-4 {
+  animation: erp-slide-down 0.22s ease-out both;
+}
+
+/* Dialog backdrops fade in */
+.fixed.inset-0[class*='backdrop-blur'] {
+  animation: erp-fade 0.18s ease-out both;
+}
+
+/* Loading placeholder: a soft moving highlight */
+.skeleton {
+  position: relative;
+  overflow: hidden;
+  border-radius: 0.5rem;
+  background: rgb(226 232 240 / 0.8);
+}
+.dark .skeleton {
+  background: rgb(51 65 85 / 0.6);
+}
+.skeleton::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  transform: translateX(-100%);
+  background: linear-gradient(90deg, transparent, rgb(255 255 255 / 0.55), transparent);
+  animation: erp-shimmer 1.3s infinite;
+}
+.dark .skeleton::after {
+  background: linear-gradient(90deg, transparent, rgb(148 163 184 / 0.18), transparent);
+}
+
+/* Cards that can be clicked lift a little under the pointer */
+.card-lift {
+  transition:
+    box-shadow 0.2s ease,
+    transform 0.2s ease,
+    border-color 0.2s ease;
+}
+.card-lift:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+  border-color: rgb(148 163 184 / 0.6);
+}
+
+/* Sticky table headers get a hairline so rows scroll cleanly under them */
+:where(thead.sticky, thead[class*='sticky']) {
+  box-shadow: 0 1px 0 rgb(226 232 240);
+}
+.dark :where(thead.sticky, thead[class*='sticky']) {
+  box-shadow: 0 1px 0 rgb(51 65 85);
+}
+
+/* Calmer scrollbars: thinner and rounder, a touch darker on hover */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgb(148 163 184 / 0.45) transparent;
+}
+
+/* ---------------------------------------------------------------------------------------------
+   Liquid glass
+   Translucent, softly blurred surfaces with a bright edge, floating over a gentle coloured backdrop.
+   Big blur is kept to the few surfaces that float (header, sidebar, dialogs, menus, toasts); the many
+   cards on a page only get the cheap translucent look, so scrolling stays smooth on phones.
+   --------------------------------------------------------------------------------------------- */
+
+@keyframes erp-slide-up {
+  from {
+    opacity: 0;
+    transform: translateY(14px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+.animate-in.slide-in-from-bottom,
+.animate-in.slide-in-from-bottom-5,
+.animate-in.slide-in-from-bottom-4 {
+  animation: erp-slide-up 0.28s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+/* The shared glass recipe */
+.glass,
+.fixed.inset-0[class*='backdrop-blur'] > div:not([class*='bg-transparent']):not([class*='bg-slate-9']),
+div.absolute[class*='rounded-xl'][class*='bg-white'][class*='shadow-lg'],
+.fixed [class*='rounded-xl'][class*='bg-white'][class*='shadow-xl'] {
+  background: linear-gradient(135deg, rgb(255 255 255 / 0.86), rgb(255 255 255 / 0.7)) !important;
+  -webkit-backdrop-filter: blur(22px) saturate(1.7);
+  backdrop-filter: blur(22px) saturate(1.7);
+  border: 1px solid rgb(255 255 255 / 0.7) !important;
+  box-shadow:
+    0 18px 44px -12px rgb(30 41 90 / 0.28),
+    0 2px 6px rgb(30 41 90 / 0.06),
+    inset 0 1px 0 rgb(255 255 255 / 0.95),
+    inset 0 -1px 0 rgb(255 255 255 / 0.25) !important;
+}
+.dark .glass,
+.dark .fixed.inset-0[class*='backdrop-blur'] > div:not([class*='bg-transparent']):not([class*='bg-slate-9']),
+.dark div.absolute[class*='rounded-xl'][class*='bg-white'][class*='shadow-lg'],
+.dark .fixed [class*='rounded-xl'][class*='bg-white'][class*='shadow-xl'] {
+  background: linear-gradient(135deg, rgb(30 41 59 / 0.82), rgb(15 23 42 / 0.68)) !important;
+  border: 1px solid rgb(255 255 255 / 0.1) !important;
+  box-shadow:
+    0 18px 44px -12px rgb(0 0 0 / 0.6),
+    inset 0 1px 0 rgb(255 255 255 / 0.1),
+    inset 0 -1px 0 rgb(255 255 255 / 0.03) !important;
+}
+
+/* Dialog backdrops: a deeper, calmer blur behind the glass panel */
+.fixed.inset-0[class*='backdrop-blur'] {
+  background-color: rgb(15 23 42 / 0.38) !important;
+  -webkit-backdrop-filter: blur(10px) saturate(1.2);
+  backdrop-filter: blur(10px) saturate(1.2);
+}
+
+/* Page cards: translucent with a bright top edge (no blur, so long lists stay fast) */
+main :where([class*='rounded-xl'][class*='border'][class*='bg-white']):not(table):not(input):not(select):not(textarea):not(button) {
+  background: linear-gradient(160deg, rgb(255 255 255 / 0.78), rgb(255 255 255 / 0.55));
+  border-color: rgb(255 255 255 / 0.8);
+  box-shadow:
+    0 6px 18px -8px rgb(30 41 90 / 0.14),
+    0 1px 2px rgb(30 41 90 / 0.05),
+    inset 0 1px 0 rgb(255 255 255 / 0.9);
+}
+.dark main :where([class*='rounded-xl'][class*='border'][class*='bg-white']):not(table):not(input):not(select):not(textarea):not(button),
+.dark main :where([class*='rounded-xl'][class*='border'][class*='dark:bg-slate-900']):not(table):not(input):not(select):not(textarea):not(button) {
+  background: linear-gradient(160deg, rgb(30 41 59 / 0.7), rgb(15 23 42 / 0.55));
+  border-color: rgb(255 255 255 / 0.08);
+  box-shadow:
+    0 6px 18px -8px rgb(0 0 0 / 0.5),
+    inset 0 1px 0 rgb(255 255 255 / 0.07);
+}
+
+/* Soft colour drifting behind everything, so the glass has something to refract */
+.glass-backdrop {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  z-index: 0;
+}
+.glass-backdrop::before,
+.glass-backdrop::after,
+.glass-backdrop > i {
+  content: '';
+  position: absolute;
+  border-radius: 9999px;
+  filter: blur(70px);
+  opacity: 0.95;
+  will-change: transform;
+}
+.glass-backdrop::before {
+  width: 46vw;
+  height: 46vw;
+  left: -10vw;
+  top: -12vw;
+  background: radial-gradient(circle, rgb(59 130 246 / 0.55), transparent 68%);
+  animation: erp-drift-a 26s ease-in-out infinite alternate;
+}
+.glass-backdrop::after {
+  width: 42vw;
+  height: 42vw;
+  right: -8vw;
+  top: 8vh;
+  background: radial-gradient(circle, rgb(168 85 247 / 0.45), transparent 68%);
+  animation: erp-drift-b 32s ease-in-out infinite alternate;
+}
+.glass-backdrop > i {
+  width: 40vw;
+  height: 40vw;
+  left: 25vw;
+  bottom: -16vw;
+  background: radial-gradient(circle, rgb(16 185 129 / 0.4), transparent 68%);
+  animation: erp-drift-c 38s ease-in-out infinite alternate;
+}
+.dark .glass-backdrop::before,
+.dark .glass-backdrop::after,
+.dark .glass-backdrop > i {
+  opacity: 0.28;
+}
+@keyframes erp-drift-a {
+  to {
+    transform: translate(10vw, 8vh) scale(1.15);
+  }
+}
+@keyframes erp-drift-b {
+  to {
+    transform: translate(-9vw, 10vh) scale(1.1);
+  }
+}
+@keyframes erp-drift-c {
+  to {
+    transform: translate(8vw, -9vh) scale(1.2);
+  }
+}
+
+@media print {
+  *,
+  *::before,
+  *::after {
+    -webkit-backdrop-filter: none !important;
+    backdrop-filter: none !important;
+  }
+  .glass-backdrop {
+    display: none !important;
+  }
+}
+
+/* ---------------------------------------------------------------------------------------------
+   Pill shapes
+   Buttons, fields and small badges are fully rounded, like the glass controls on a phone. The radius is
+   capped at 1.25rem, so a short control becomes a true pill while a big clickable tile keeps soft corners
+   instead of being cut into a stadium. (Unlayered CSS wins over the utility classes.)
+   --------------------------------------------------------------------------------------------- */
+
+button:not([role='switch']):not([class*='border-b-2']):not([class*='rounded-none']):not(.no-pill),
+[role='button']:not(.no-pill),
+input:not([type='checkbox']):not([type='radio']):not([type='range']):not([type='file']):not([type='color']):not(.no-pill),
+select:not(.no-pill) {
+  border-radius: 1.25rem;
+}
+
+/* Small coloured badges and tags */
+span:is(
+    [class*='bg-amber-100'],
+    [class*='bg-emerald-50'],
+    [class*='bg-emerald-100'],
+    [class*='bg-rose-100'],
+    [class*='bg-slate-200'],
+    [class*='bg-blue-100'],
+    [class*='bg-sky-50'],
+    [class*='bg-indigo-100'],
+    [class*='bg-red-50'],
+    [class*='bg-green-100']
+  ):is([class*='px-1'], [class*='px-2']):not(.no-pill) {
+  border-radius: 9999px;
+}
+
+/* Keep long text boxes soft-cornered rather than pill shaped */
+textarea {
+  border-radius: 1rem;
+}
+
+/* ---------------------------------------------------------------------------------------------
+   Easier to read
+   The pale greys used for labels and hints were too faint, especially on the glass panels and on
+   phones in sunlight. Every grey text steps one shade darker (lighter in dark mode), the tiniest
+   sizes grow a little, and placeholders and form labels are clearer. Applied once here, so every
+   screen benefits.
+   --------------------------------------------------------------------------------------------- */
+
+/* Light mode: darker greys (not inside dark banners and toolbars, where the light greys are right) */
+html:not(.dark) .text-slate-400:not([class*='bg-slate-9'] *):not([class*='from-slate-9'] *):not([class*='bg-gray-9'] *):not([class*='bg-black'] *) { color: #64748b; }
+html:not(.dark) .text-slate-500:not([class*='bg-slate-9'] *):not([class*='from-slate-9'] *):not([class*='bg-gray-9'] *):not([class*='bg-black'] *) { color: #475569; }
+html:not(.dark) .text-slate-600 { color: #334155; }
+html:not(.dark) .text-slate-700 { color: #1e293b; }
+html:not(.dark) .text-slate-800,
+html:not(.dark) .text-slate-900 { color: #0b1220; }
+html:not(.dark) .text-gray-400 { color: #6b7280; }
+html:not(.dark) .text-gray-500 { color: #4b5563; }
+html:not(.dark) .text-gray-600 { color: #374151; }
+
+/* Hover colours keep up (an element can be darker on hover than at rest) */
+html:not(.dark) .hover\:text-slate-600:hover { color: #1e293b; }
+html:not(.dark) .hover\:text-slate-700:hover { color: #0f172a; }
+
+/* Dark mode: lighter greys on the dark panels */
+.dark .text-slate-400,
+.dark [class~='dark:text-slate-400'] { color: #cbd5e1; }
+.dark .text-slate-500,
+.dark [class~='dark:text-slate-500'] { color: #b4c0d3; }
+.dark .text-slate-600 { color: #cbd5e1; }
+.dark [class~='dark:text-slate-300'] { color: #e2e8f0; }
+
+/* Placeholders: visible, but still clearly a hint */
+::placeholder {
+  color: #64748b;
+  opacity: 1;
+}
+.dark ::placeholder {
+  color: #94a3b8;
+}
+
+/* The smallest text grows a little: 10px -> 11px, 11px -> 12px */
+[class*='text-[9px]'] { font-size: 10.5px; }
+[class*='text-[10px]'] { font-size: 11.5px; }
+[class*='text-[11px]'] { font-size: 12px; }
+[class*='text-[7.5px]'] { font-size: 9pt; }
+
+/* Form labels and table headers read as headings of their field */
+label {
+  font-weight: 600;
+}
+:where(thead th) {
+  font-weight: 700;
+}
+
+/* Cards keep their text crisp on the glass */
+main :where([class*='bg-white'], [class*='dark:bg-slate-900']) {
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ---------------------------------------------------------------------------------------------
+   Phones and touch screens
+   --------------------------------------------------------------------------------------------- */
+
+/* Fingers need bigger targets than a mouse pointer */
+@media (pointer: coarse) {
+  :where(button, [role='button'], select, input:not([type='checkbox']):not([type='radio']):not([type='range'])) {
+    min-height: 2.25rem;
+  }
+}
+
+@media (max-width: 639px) {
+  /* Roomy desktop card padding is wasted space on a narrow screen */
+  main :where([class~='p-6']) {
+    padding: 1rem;
+  }
+  main :where([class~='p-5']) {
+    padding: 0.95rem;
+  }
+  main h1 {
+    font-size: 1.2rem;
+    line-height: 1.3;
+  }
+}
+
+/* Phones: wide data tables become one card per row (the column names are added by ResponsiveTables) */
+@media (max-width: 767px) {
+  table[data-rt]:not(.hidden),
+  table[data-rt]:not(.hidden) > tbody,
+  table[data-rt]:not(.hidden) > tfoot {
+    display: block;
+    width: 100%;
+    min-width: 0 !important;
+  }
+  table[data-rt] > thead {
+    display: none;
+  }
+  table[data-rt] > tbody > tr,
+  table[data-rt] > tfoot > tr {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.45rem 0.9rem;
+    margin: 0 0 0.6rem;
+    padding: 0.75rem 0.85rem;
+    border: 1px solid rgb(226 232 240) !important;
+    border-radius: 0.95rem;
+    background: rgb(255 255 255 / 0.85);
+  }
+  .dark table[data-rt] > tbody > tr,
+  .dark table[data-rt] > tfoot > tr {
+    border-color: rgb(51 65 85) !important;
+    background: rgb(15 23 42 / 0.6);
+  }
+  table[data-rt] > tbody > tr > td,
+  table[data-rt] > tfoot > tr > td {
+    display: block;
+    min-width: 0;
+    padding: 0 !important;
+    border: 0 !important;
+    text-align: left !important;
+    white-space: normal !important;
+    overflow-wrap: anywhere;
+    width: auto !important;
+  }
+  table[data-rt] > tbody > tr > td[data-label]:not([data-label=''])::before {
+    content: attr(data-label);
+    display: block;
+    margin-bottom: 0.1rem;
+    font-size: 0.64rem;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: rgb(100 116 139);
+  }
+  /* the row title, tick boxes, action buttons and full-width notes take the whole card width */
+  table[data-rt] > tbody > tr > td[data-primary],
+  table[data-rt] > tbody > tr > td[data-label=''],
+  table[data-rt] > tbody > tr > td[colspan],
+  table[data-rt] > tfoot > tr > td {
+    grid-column: 1 / -1;
+  }
+  table[data-rt] > tbody > tr > td[data-primary][data-label]:not([data-label=''])::before {
+    display: none;
+  }
+  table[data-rt] > tbody > tr > td[colspan] {
+    text-align: center !important;
+  }
+  /* controls that sat right-aligned in the last column keep their spacing */
+  table[data-rt] > tbody > tr > td[data-label=''] > div {
+    justify-content: flex-start;
+  }
+}
+
+/* People who ask their device for less motion get none */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

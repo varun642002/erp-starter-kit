@@ -1,0 +1,171 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ===============================================================
+    // Assumed Data Model
+    // ===============================================================
+    //
+    // Collection: users            Document ID: Firebase Auth uid
+    //   - uid: string (required, immutable, == document id)
+    //   - email: string (required, immutable, == auth token email)
+    //   - displayName: string | null (required, <= 100 chars)
+    //   - photoURL: string | null (required, <= 500 chars)
+    //   - role: string (required, one of roles()) - privileged, super admin only
+    //   - approved: bool (required) - privileged, super admin only
+    //   - company: string (required, <= 120 chars)
+    //   - branchId: string (required, <= 60 chars) - privileged, super admin only
+    //   - phone: string (optional, <= 20 chars)
+    //   - createdAt: timestamp (required, immutable)
+    //   - lastLogin: timestamp (required)
+    //
+    // Collections: ERP business data (see erpCollections() below), plus
+    //   settings/companyConfig. Gated by "approved account" only; documents
+    //   are NOT schema-validated here (prototype).
+    //
+    // New accounts are always created as role 'Salesperson', approved=false.
+    // Only an approved Super Admin can approve users or change role/branch.
+    // The first Super Admin is bootstrapped out-of-band with admin credentials.
+    // ===============================================================
+
+    // ---------------- Helper functions ----------------
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function profilePath(uid) {
+      return /databases/$(database)/documents/users/$(uid);
+    }
+
+    function isApproved() {
+      return isSignedIn()
+        && exists(profilePath(request.auth.uid))
+        && get(profilePath(request.auth.uid)).data.approved == true;
+    }
+
+    function isSuperAdmin() {
+      return isApproved()
+        && get(profilePath(request.auth.uid)).data.role == 'Super Admin';
+    }
+
+    function roles() {
+      return [
+        'Super Admin', 'Business Owner', 'Branch Person', 'Branch Manager',
+        'Accountant', 'Sales Manager', 'Salesperson', 'Purchase Manager',
+        'Warehouse Manager', 'Warehouse Staff', 'Cashier'
+      ];
+    }
+
+    // Business collections any approved account may read, add to and edit.
+    function erpCollections() {
+      return [
+        'branches', 'customers', 'expenses', 'invoices',
+        'payments', 'products', 'projects', 'sales',
+        'salesOrders', 'suppliers', 'warehouses', 'warranties'
+      ];
+    }
+
+    function roleOf(uid) {
+      return get(profilePath(uid)).data.role;
+    }
+
+    // Only these roles may remove business records from the browser.
+    function canDeleteBusinessData() {
+      return isApproved()
+        && roleOf(request.auth.uid) in
+          ['Super Admin', 'Business Owner', 'Branch Manager', 'Accountant', 'Branch Person'];
+    }
+
+    function isOwnerRole() {
+      return isApproved()
+        && roleOf(request.auth.uid) in ['Super Admin', 'Business Owner'];
+    }
+
+    function optionalString(data, field, maxLen) {
+      return !(field in data)
+        || (data[field] is string && data[field].size() <= maxLen);
+    }
+
+    function nullableString(data, field, maxLen) {
+      return data[field] == null
+        || (data[field] is string && data[field].size() <= maxLen);
+    }
+
+    // ---------------- Domain validator ----------------
+
+    function isValidUser(data) {
+      return data.keys().hasAll([
+          'uid', 'email', 'displayName', 'photoURL', 'role', 'approved',
+          'company', 'branchId', 'createdAt', 'lastLogin'
+        ])
+        && data.keys().hasOnly([
+          'uid', 'email', 'displayName', 'photoURL', 'role', 'approved',
+          'company', 'branchId', 'phone', 'createdAt', 'lastLogin'
+        ])
+        && data.uid is string && data.uid.size() <= 128
+        && data.email is string && data.email.size() <= 254
+        && nullableString(data, 'displayName', 100)
+        && nullableString(data, 'photoURL', 500)
+        && data.role in roles()
+        && data.approved is bool
+        && data.company is string && data.company.size() <= 120
+        && data.branchId is string && data.branchId.size() <= 60
+        && optionalString(data, 'phone', 20)
+        && data.createdAt is timestamp
+        && data.lastLogin is timestamp;
+    }
+
+    // Fields a user may change on their own profile.
+    function selfEditOnly() {
+      return request.resource.data.diff(resource.data).affectedKeys()
+        .hasOnly(['lastLogin', 'displayName', 'photoURL', 'phone']);
+    }
+
+    // ---------------- Rules ----------------
+
+    match /users/{userId} {
+      allow read: if isSignedIn() && (request.auth.uid == userId || isSuperAdmin());
+
+      // Self-signup: always unapproved and lowest role; cannot choose privileges.
+      allow create: if isSignedIn()
+        && request.auth.uid == userId
+        && isValidUser(request.resource.data)
+        && request.resource.data.uid == userId
+        && request.resource.data.email == request.auth.token.email
+        && request.resource.data.approved == false
+        && request.resource.data.role == 'Salesperson'
+        && request.resource.data.createdAt == request.time;
+
+      // Owner may only touch non-privileged fields; Super Admin may edit any
+      // valid field except identity (uid, email, createdAt).
+      allow update: if isSignedIn()
+        && isValidUser(request.resource.data)
+        && request.resource.data.uid == resource.data.uid
+        && request.resource.data.email == resource.data.email
+        && request.resource.data.createdAt == resource.data.createdAt
+        && ((request.auth.uid == userId && selfEditOnly()) || isSuperAdmin());
+
+      allow delete: if isSuperAdmin() && request.auth.uid != userId;
+    }
+
+    // Activity log: entries can be added but never changed or removed, so history cannot be rewritten.
+    match /auditLogs/{docId} {
+      allow read, create: if isApproved();
+      allow update, delete: if false;
+    }
+
+    // Company settings: everyone approved can read them, only the owner roles can change them.
+    match /settings/{docId} {
+      allow read: if isApproved();
+      allow create, update: if isOwnerRole();
+      allow delete: if false;
+    }
+
+    // ERP business data: approved accounts read and write; deleting needs a trusted role.
+    match /{collectionName}/{docId} {
+      allow read, create, update: if collectionName in erpCollections() && isApproved();
+      allow delete: if collectionName in erpCollections() && canDeleteBusinessData();
+    }
+  }
+}
